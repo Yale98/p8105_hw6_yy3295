@@ -236,7 +236,19 @@ birthweight_df =
                            mrace == 4 ~ "puerto_rican",
                            mrace == 8 ~ "other"),
          mrace = as.factor(mrace))
+```
 
+Check if there are missing values 
+
+```{r}
 sum(is.na(birthweight_df))
+```
+
+There are no missing values for the data.
+
+Propose a regression model for birth weight.
+
+```{r}
+
 ```
 
