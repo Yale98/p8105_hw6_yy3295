@@ -269,6 +269,8 @@ main_effect_mod = lm(bwt ~ bhead + gaweeks, data = birthweight_df)
 three_way_inter_mod = lm(bwt ~ bhead + blength + babysex + (bhead * blength) + (bhead * babysex) + (blength * babysex) + (bhead * blength * babysex), data = birthweight_df)
 ```
 
+convert the resample objects produced by crossv_mc to dataframes.
+
 ```{r}
 cv_df = 
   crossv_mc(birthweight_df, 100) |>
@@ -304,4 +306,4 @@ cv_df |>
   ggplot(aes(x = model, y = rmse)) + geom_violin()
 ```
 
-From the plot we can tell that
+From the plot we can tell that the hypothesized model is the most appropriate model among all the three models as it has the lowest RMSE. Though, the three way interaction model also has low RMSE,  the hypothesized model is still the most appropriate one.
