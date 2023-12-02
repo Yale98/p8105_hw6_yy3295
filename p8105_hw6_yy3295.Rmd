@@ -294,7 +294,14 @@ cv_df =
 plot the prediction error distribution for each candidate model.
 
 ```{r}
-
+cv_df |>
+  select(starts_with("rmse")) |>
+  pivot_longer(everything(),
+               names_to = "model",
+               values_to = "rmse",
+               names_prefix = "rmse_") |>
+  mutate(model = fct_inorder(model)) |>
+  ggplot(aes(x = model, y = rmse)) + geom_violin()
 ```
 
 From the plot we can tell that
