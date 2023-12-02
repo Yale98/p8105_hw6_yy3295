@@ -130,7 +130,7 @@ boot_straps =
   weather_df |>
   modelr::bootstrap(n = 5000) |>
   mutate(
-    models = map(strap, \(df) lm(tmax ~ tmin, data = df)),
+    models = map(strap, \(df) lm(tmax ~ tmin + prcp, data = df)),
     results_1 = map(models, broom::tidy),
     results_2 = map(models, broom::glance)) |>
   select(-strap, -models)
@@ -150,10 +150,10 @@ Plot the distribution of your estimates (r^2)
 
 ```{r}
 r2 |> 
-  ggplot(aes(x = r.squared)) + geom_density()
+  ggplot(aes(x = r.squared)) + geom_density(fill = "pink")
 ```
 
-From the plot we can tell that it is a left skewed distribution. 
+From the plot we can tell that it is a normal distribution. 
 
 Identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval (r^2)
 
@@ -166,9 +166,9 @@ confidence_interval_r <- c(lower_quantile_r, upper_quantile_r)
 
 confidence_interval_r
 ```
-The 2.5% quantile is 0.886, and 97.5% quantile is 0.938.
+The 2.5% quantile is 0.889, and 97.5% quantile is 0.941.
 
-The 95% confidence interval is (0.886, 0.938).
+The 95% confidence interval is (0.889, 0.941).
 
 For each bootstrap sample, produce estimates (log(b1 * b2))
 
@@ -178,8 +178,8 @@ logb =
   select(-results_2) |>
   unnest(results_1) |>
   select(.id, term, estimate) |>
-  mutate(term = ifelse(term == "(Intercept)", "b1",
-                       ifelse(term == "tmin", "b2", term))) |>
+  mutate(term = ifelse(term == "tmin", "b1",
+                       ifelse(term == "prcp", "b2", term))) |>
   pivot_wider(names_from = term,
               values_from = estimate) |>
   mutate(log_new = log(b1 * b2))
@@ -189,25 +189,25 @@ Plot the distribution of your estimates (log(b1 * b2))
 
 ```{r}
 logb |> 
-  ggplot(aes(x = log_new)) + geom_density()
+  ggplot(aes(x = log_new)) + geom_density(fill = "pink")
 ```
 
-From the plot we can tell that it is a normal distribution. 
+From the plot we can tell that it is a left-skewed distribution. 
 
 Identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval (log(b1 * b2))
 
 ```{r}
-lower_quantile_log <- quantile(logb$log_new, 0.025)
+lower_quantile_log <- quantile(logb$log_new, 0.025, na.rm = TRUE)
 
-upper_quantile_log <- quantile(logb$log_new, 0.975)
+upper_quantile_log <- quantile(logb$log_new, 0.975, na.rm = TRUE)
 
 confidence_interval_log <- c(lower_quantile_log, upper_quantile_log)
 
 confidence_interval_log
 ```
-The 2.5% quantile is 2.049, and 97.5% quantile is 2.133.
+The 2.5% quantile is -8.982, and 97.5% quantile is -4.602.
 
-The 95% confidence interval is (2.049, 2.133).
+The 95% confidence interval is (-8.982, -4.602).
 
 ### Question 3
 
@@ -303,7 +303,7 @@ cv_df |>
                values_to = "rmse",
                names_prefix = "rmse_") |>
   mutate(model = fct_inorder(model)) |>
-  ggplot(aes(x = model, y = rmse)) + geom_violin()
+  ggplot(aes(x = model, y = rmse)) + geom_violin(fill = "pink")
 ```
 
 From the plot we can tell that the hypothesized model is the most appropriate model among all the three models as it has the lowest RMSE. Though, the three way interaction model also has low RMSE,  the hypothesized model is still the most appropriate one.
