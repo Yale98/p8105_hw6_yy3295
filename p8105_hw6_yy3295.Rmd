@@ -1,0 +1,6 @@
+---
+title: "P8105_hw6_yy3295"
+author: "Ye Yuan"
+date: "2023-12-01"
+output: github_document
+---
