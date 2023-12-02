@@ -258,7 +258,7 @@ Show a plot of model residuals against fitted values – use add_predictions and
 birthweight_df |>
   add_predictions(hypo_mod) |>
   add_residuals(hypo_mod) |>
-  ggplot(aes(x = pred, y = resid)) + geom_point()
+  ggplot(aes(x = pred, y = resid)) + geom_point(alpha = 0.5)
 ```
 
 Compare the hypo model to the model using length at birth and gestational age as predictors (main effects only), and the model using head circumference, length, sex, and all interactions (including the three-way interaction) between these.
@@ -266,6 +266,23 @@ Compare the hypo model to the model using length at birth and gestational age as
 ```{r}
 main_effect_mod = lm(bwt ~ bhead + gaweeks, data = birthweight_df)
 
-three_way_inter_mod = lm(bwt ~ bhead + blength + babysex + bhead * blength + bhead * babysex + blength * babysex, data = birthweight_df)
+three_way_inter_mod = lm(bwt ~ bhead + blength + babysex + (bhead * blength) + (bhead * babysex) + (blength * babysex) + (bhead * blength * babysex), data = birthweight_df)
 ```
 
+```{r}
+
+```
+
+Fit models to training data and obtain corresponding RMSEs for the testing data.
+
+```{r}
+
+```
+
+plot the prediction error distribution for each candidate model.
+
+```{r}
+
+```
+
+From the plot we can tell that
