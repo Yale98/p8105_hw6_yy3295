@@ -9,6 +9,9 @@ output: github_document
 library(tidyverse)
 library(viridis)
 library(modelr)
+library(mgcv)
+
+set.seed(1)
 
 knitr::opts_chunk$set(
 	echo = TRUE,
@@ -119,3 +122,111 @@ weather_df =
     tmax = tmax / 10) |>
   select(name, id, everything())
 ```
+
+Use 5000 bootstrap samples.
+
+```{r}
+boot_straps = 
+  weather_df |>
+  modelr::bootstrap(n = 5000) |>
+  mutate(
+    models = map(strap, \(df) lm(tmax ~ tmin, data = df)),
+    results_1 = map(models, broom::tidy),
+    results_2 = map(models, broom::glance)) |>
+  select(-strap, -models)
+```
+
+For each bootstrap sample, produce estimates (r^2)
+
+```{r}
+r2 = 
+  boot_straps |>
+  select(-results_1) |>
+  unnest(results_2) |>
+  select(.id, r.squared)
+```
+
+Plot the distribution of your estimates (r^2)
+
+```{r}
+r2 |> 
+  ggplot(aes(x = r.squared)) + geom_density()
+```
+
+Identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval (r^2)
+
+```{r}
+lower_quantile_r <- quantile(r2$r.squared, 0.025)
+
+upper_quantile_r <- quantile(r2$r.squared, 0.975)
+
+confidence_interval_r <- c(lower_quantile_r, upper_quantile_r)
+
+confidence_interval_r
+```
+
+For each bootstrap sample, produce estimates (log(b1 * b2))
+
+```{r}
+logb = 
+  boot_straps |>
+  select(-results_2) |>
+  unnest(results_1) |>
+  select(.id, term, estimate) |>
+  mutate(term = ifelse(term == "(Intercept)", "b1",
+                       ifelse(term == "tmin", "b2", term))) |>
+  pivot_wider(names_from = term,
+              values_from = estimate) |>
+  mutate(log_new = log(b1 * b2))
+```
+
+Plot the distribution of your estimates (log(b1 * b2))
+
+```{r}
+logb |> 
+  ggplot(aes(x = log_new)) + geom_density()
+```
+
+Identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval (log(b1 * b2))
+
+```{r}
+lower_quantile_log <- quantile(logb$log_new, 0.025)
+
+upper_quantile_log <- quantile(logb$log_new, 0.975)
+
+confidence_interval_log <- c(lower_quantile_log, upper_quantile_log)
+
+confidence_interval_log
+```
+
+### Question 3
+
+Load and clean the data for regression analysis
+
+```{r}
+birthweight_df = 
+  read_csv("data/birthweight.csv") |>
+  janitor::clean_names() |>
+  mutate(babysex = case_when(babysex == 1 ~ "male",
+                         babysex == 2 ~ "female"),
+         babysex = as.factor(babysex),
+         frace = case_when(frace == 1 ~ "white",
+                           frace == 2 ~ "black",
+                           frace == 3 ~ "asian",
+                           frace == 4 ~ "puerto_rican",
+                           frace == 8 ~ "other",
+                           frace == 9 ~ "unknown"),
+         frace = as.factor(frace),
+         malform = case_when(malform == 0 ~ "absent",
+                             malform == 1 ~ "present"),
+         malform = as.factor(malform),
+         mrace = case_when(mrace == 1 ~ "white",
+                           mrace == 2 ~ "black",
+                           mrace == 3 ~ "asian",
+                           mrace == 4 ~ "puerto_rican",
+                           mrace == 8 ~ "other"),
+         mrace = as.factor(mrace))
+
+sum(is.na(birthweight_df))
+```
+
