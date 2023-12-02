@@ -153,6 +153,8 @@ r2 |>
   ggplot(aes(x = r.squared)) + geom_density()
 ```
 
+From the plot we can tell that it is a left skewed distribution. 
+
 Identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval (r^2)
 
 ```{r}
@@ -164,6 +166,9 @@ confidence_interval_r <- c(lower_quantile_r, upper_quantile_r)
 
 confidence_interval_r
 ```
+The 2.5% quantile is 0.886, and 97.5% quantile is 0.938.
+
+The 95% confidence interval is (0.886, 0.938).
 
 For each bootstrap sample, produce estimates (log(b1 * b2))
 
@@ -187,6 +192,8 @@ logb |>
   ggplot(aes(x = log_new)) + geom_density()
 ```
 
+From the plot we can tell that it is a normal distribution. 
+
 Identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval (log(b1 * b2))
 
 ```{r}
@@ -198,6 +205,9 @@ confidence_interval_log <- c(lower_quantile_log, upper_quantile_log)
 
 confidence_interval_log
 ```
+The 2.5% quantile is 2.049, and 97.5% quantile is 2.133.
+
+The 95% confidence interval is (2.049, 2.133).
 
 ### Question 3
 
