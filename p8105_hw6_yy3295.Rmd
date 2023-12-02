@@ -270,13 +270,25 @@ three_way_inter_mod = lm(bwt ~ bhead + blength + babysex + (bhead * blength) + (
 ```
 
 ```{r}
-
+cv_df = 
+  crossv_mc(birthweight_df, 100) |>
+ mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble))
 ```
 
 Fit models to training data and obtain corresponding RMSEs for the testing data.
 
 ```{r}
-
+cv_df = 
+  cv_df |> mutate(
+    hypo_mod  = map(train, \(df) lm(bwt ~ bhead + blength + gaweeks, data = df)),
+    main_effect_mod = map(train, \(df) lm(bwt ~ bhead + gaweeks, data = df)),
+    three_way_inter_mod = map(train, \(df) lm(bwt ~ bhead + blength + babysex + (bhead * blength) + (bhead * babysex) + (blength * babysex) + (bhead * blength * babysex), data = df)))|> 
+  mutate(
+    rmse_hypo = map2_dbl(hypo_mod, test, \(mod, df) rmse(model = mod, data = df)),
+    rmse_main = map2_dbl(main_effect_mod, test, \(mod, df) rmse(model = mod, data = df)),
+    rmse_three = map2_dbl(three_way_inter_mod, test, \(mod, df) rmse(model = mod, data = df)))
 ```
 
 plot the prediction error distribution for each candidate model.
