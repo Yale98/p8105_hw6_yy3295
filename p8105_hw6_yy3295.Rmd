@@ -261,3 +261,11 @@ birthweight_df |>
   ggplot(aes(x = pred, y = resid)) + geom_point()
 ```
 
+Compare the hypo model to the model using length at birth and gestational age as predictors (main effects only), and the model using head circumference, length, sex, and all interactions (including the three-way interaction) between these.
+
+```{r}
+main_effect_mod = lm(bwt ~ bhead + gaweeks, data = birthweight_df)
+
+three_way_inter_mod = lm(bwt ~ bhead + blength + babysex + bhead * blength + bhead * babysex + blength * babysex, data = birthweight_df)
+```
+
